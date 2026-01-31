@@ -35,6 +35,14 @@
       animation: burn-in-protect 30s ease infinite;
     }
   </style>
+  <script>
+    // Shim for process.env to prevent ReferenceErrors in the browser
+    window.process = {
+      env: {
+        API_KEY: "" // Will be overridden by the environment if available
+      }
+    };
+  </script>
 <script type="importmap">
 {
   "imports": {
@@ -49,5 +57,7 @@
 </head>
 <body class="bg-mesh">
   <div id="root"></div>
+  <!-- Explicitly load the entry point -->
+  <script type="module" src="./index.tsx"></script>
 </body>
 </html>

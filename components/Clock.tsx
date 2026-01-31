@@ -25,23 +25,21 @@ const Clock: React.FC = () => {
   });
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 sm:p-8 lg:p-12 bg-gradient-to-br from-zinc-900/60 to-zinc-900/10 rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] border border-zinc-800/50 backdrop-blur-xl shadow-2xl overflow-hidden relative group">
-      {/* Decorative accent */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"></div>
+    <div className="flex flex-col items-center justify-center p-6 sm:p-8 lg:p-10 bg-zinc-900/30 rounded-3xl border border-zinc-800/50 backdrop-blur-xl shadow-2xl relative group overflow-hidden">
+      {/* Glow Effect */}
+      <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
       
-      <div className="flex items-baseline gap-1 sm:gap-2">
-        <div className="text-6xl sm:text-8xl md:text-9xl lg:text-[10rem] xl:text-[12rem] font-black leading-none tracking-tighter text-white font-mono drop-shadow-[0_0_30px_rgba(255,255,255,0.05)]">
+      <div className="flex items-baseline gap-1 sm:gap-2 relative z-10">
+        <div className="text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] font-black leading-none tracking-tighter text-white font-mono">
           {formattedTime}
         </div>
-        <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-mono font-bold text-indigo-500/40 mb-2 sm:mb-4 lg:mb-8 w-8 sm:w-12 lg:w-16">
+        <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-mono font-bold text-indigo-500/40 mb-2 sm:mb-4 lg:mb-6 w-8 sm:w-12">
           {seconds}
         </div>
       </div>
       
-      <div className="text-sm sm:text-xl lg:text-3xl xl:text-4xl font-medium text-zinc-500 mt-1 sm:mt-2 uppercase tracking-[0.2em] sm:tracking-[0.3em] flex items-center gap-2 sm:gap-4 text-center">
-        <span className="hidden sm:block w-4 lg:w-8 h-[1px] lg:h-[2px] bg-zinc-800"></span>
+      <div className="text-xs sm:text-lg lg:text-2xl font-bold text-zinc-500 mt-2 uppercase tracking-[0.2em] sm:tracking-[0.4em] text-center relative z-10">
         {formattedDate}
-        <span className="hidden sm:block w-4 lg:w-8 h-[1px] lg:h-[2px] bg-zinc-800"></span>
       </div>
     </div>
   );
