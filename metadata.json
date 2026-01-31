@@ -1,0 +1,7 @@
+{
+  "name": "Paris Vision Dashboard",
+  "description": "A high-end personal dashboard designed for TV display, featuring a real-time clock, Paris weather, and an AI-curated French news feed using Gemini Search Grounding.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
