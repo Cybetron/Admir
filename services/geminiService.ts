@@ -7,12 +7,11 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 export const fetchParisDashboardData = async (): Promise<{ news: NewsItem[], weather: WeatherData }> => {
   const model = 'gemini-3-flash-preview';
 
-  // Step 1: Get the raw information using Google Search grounding
+  // We perform a grounded search first
   const searchPrompt = `
-    Find the following information for Paris, France:
-    1. Current weather: temperature (Celsius), conditions, high/low, and humidity.
-    2. Top 5 latest news stories from "Sortir à Paris" and general French news (e.g., Le Monde).
-    Provide a detailed summary.
+    Search for the CURRENT real-time weather in Paris, France right now. 
+    I need: exact temperature in Celsius, current sky conditions (e.g. Sunny, Overcast, Light Rain), today's High and Low temperatures, and Humidity percentage.
+    Also find the top 5 trending news headlines from "Sortir à Paris" and "Le Monde" specifically for today.
   `;
 
   try {
@@ -24,20 +23,29 @@ export const fetchParisDashboardData = async (): Promise<{ news: NewsItem[], wea
       },
     });
 
-    const rawBriefing = searchResponse.text || "";
+    const searchContext = searchResponse.text || "No data found";
     const groundingChunks = searchResponse.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
 
-    // Step 2: Use the model to convert that briefing into structured JSON
-    // We don't use tools here so we can safely use responseSchema/JSON mode
+    // Second pass: Precise JSON extraction
     const extractionPrompt = `
-      Extract the following information into JSON from this briefing:
-      BRIEFING: "${rawBriefing.replace(/"/g, "'")}"
+      Based on this research data: "${searchContext.replace(/"/g, "'")}"
+      Convert it into a valid JSON object.
       
-      JSON Structure:
+      Schema:
       {
-        "weather": { "temp": number, "condition": string, "high": number, "low": number, "humidity": number },
-        "news": [ { "title": string, "source": string, "snippet": string } ]
+        "weather": {
+          "temp": number,
+          "condition": "string (e.g. Sunny, Partly Cloudy, Rain)",
+          "high": number,
+          "low": number,
+          "humidity": number
+        },
+        "news": [
+          { "title": "string", "source": "string", "snippet": "string" }
+        ]
       }
+      
+      Ensure "temp" is a number representing current Celsius.
     `;
 
     const extractionResponse = await ai.models.generateContent({
@@ -57,7 +65,7 @@ export const fetchParisDashboardData = async (): Promise<{ news: NewsItem[], wea
                 low: { type: Type.NUMBER },
                 humidity: { type: Type.NUMBER },
               },
-              required: ["temp", "condition", "high", "low", "humidity"],
+              required: ["temp", "condition", "high", "low", "humidity"]
             },
             news: {
               type: Type.ARRAY,
@@ -68,21 +76,20 @@ export const fetchParisDashboardData = async (): Promise<{ news: NewsItem[], wea
                   source: { type: Type.STRING },
                   snippet: { type: Type.STRING },
                 },
-                required: ["title", "source", "snippet"],
-              },
-            },
+                required: ["title", "source", "snippet"]
+              }
+            }
           },
-          required: ["weather", "news"],
-        },
+          required: ["weather", "news"]
+        }
       },
     });
 
     const data = JSON.parse(extractionResponse.text || "{}");
 
-    // Map news with links from grounding chunks if possible, otherwise use fallback
     const news: NewsItem[] = (data.news || []).map((item: any, index: number) => ({
       ...item,
-      url: groundingChunks[index]?.web?.uri || "https://www.google.com/search?q=" + encodeURIComponent(item.title),
+      url: groundingChunks[index]?.web?.uri || "https://www.google.com/search?q=" + encodeURIComponent(item.title)
     }));
 
     return { 
@@ -90,7 +97,7 @@ export const fetchParisDashboardData = async (): Promise<{ news: NewsItem[], wea
       weather: data.weather || { temp: 0, condition: "Unknown", high: 0, low: 0, humidity: 0, description: "" } 
     };
   } catch (error) {
-    console.error("Error fetching dashboard data:", error);
+    console.error("Dashboard Sync Error:", error);
     throw error;
   }
 };
